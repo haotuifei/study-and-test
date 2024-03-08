@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+    <style>
+        td {
+            width: 25%;
+            border: black 1px solid;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    影厅名字：<input type="text" v-model="cinemaHallName">
+    <input type="button" value="添加影厅" @click="addCinHall">
+    <table>
+        <tr>
+            <td>影厅名</td>
+            <td>座位信息</td>
+            <td>影厅状态</td>
+            <td>操作</td>
+        </tr>
+        <tr v-for="item in hallList">
+            <td>{{item.cinemaHallName}}</td>
+            <td><input type="button" value="编辑座位" @click="changePlace(item.cinemaHallId)"></td>
+            <td>
+                <span v-if="item.cinemaHallState === 0">正常</span>
+                <span v-else-if="item.cinemaHallState === 1">停用</span>
+            </td>
+            <td>
+                <input v-if="item.cinemaHallState === 0" type="button" value="停用"
+                       @click="banCinHall(item.cinemaHallId)">
+                <input v-if="item.cinemaHallState === 1" type="button" value="启用"
+                       @click="UnblockingCinHall(item.cinemaHallId)">
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            hallList: [],
+            cinemaHallName: ''
+        },
+        methods: {
+            addCinHall() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/addcinhall',
+                    data: "cinemaHallName=" + _this.cinemaHallName
+                }).then(function (resp) {
+                    alert(resp.data.msg);
+                    window.location = "selCinHall.html";
+                });
+            },
+            getCinHall() {
+                let _this = this
+                axios({
+                    method: 'post',
+                    url: "http://localhost:8080/chwk/movie/selectcinhall"
+                }).then(function (resp) {
+                    console.log(resp.data.data)
+                    _this.hallList = resp.data.data;
+                })
+            },
+            banCinHall(CinemaHallId) {
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/bancinhall',
+                    data: "CinemaHallId=" + CinemaHallId
+                })
+                    .then(function (resp) {
+                        console.log(resp.data)
+                        alert(resp.data.msg);
+                        window.location = "selCinHall.html"
+                    })
+            },
+            UnblockingCinHall(CinemaHallId) {
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/unblockingcinhall',
+                    data: "CinemaHallId=" + CinemaHallId
+                })
+                    .then(function (resp) {
+                        console.log(resp.data);
+                        alert(resp.data.msg);
+                        window.location = "selCinHall.html"
+                    })
+            },
+            changePlace(cinemaHallId) {
+                localStorage.setItem("cinemaHallId", cinemaHallId);
+                window.location = "changePlace.html"
+            }
+
+        },
+        mounted() {
+            this.getCinHall();
+        }
+    })
+</script>

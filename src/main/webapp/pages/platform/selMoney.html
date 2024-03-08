@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        td{
+            border: black 1px solid;
+            text-align: center;
+        }
+        table{
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td>总盈利</td>
+            <td>影院分成</td>
+            <td>最终收入</td>
+        </tr>
+        <tr>
+            <td>{{money}}</td>
+            <td>{{money/2}}</td>
+            <td>{{money/2}}</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            money: ''
+        },
+        methods: {
+            getAllMoney() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/platform/selectallmoney")
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.money = resp.data.data;
+                    });
+            },
+        },
+        mounted() {
+            this.getAllMoney();
+        }
+    })
+</script>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>购票</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        td{
+            border: black 1px solid;
+            text-align: center;
+            height: 100px;
+        }
+        table{
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td>电影海报</td>
+            <td>电影名称</td>
+            <td>电影时长</td>
+            <td>上映时间</td>
+            <td>上映影院</td>
+            <td>影厅</td>
+            <td></td>
+        </tr>
+        <tr v-for="item in schedulingList">
+            <td><img :src="item.film.filmPosters" height="172" width="108"/></td>
+            <td>{{item.film.filmName}}</td>
+            <td>{{item.film.filmTime/60}}分钟</td>
+            <td>
+                {{formatDate(item.schedulingRuntime)}}至<br/>
+                {{formatDate(item.schedulingOvertime)}}
+            </td>
+            <td>{{item.movie.movieName}}</td>
+            <td>{{item.cinemaHall.cinemaHallName}}</td>
+            <td v-if="item.movie.movieState === 0"><input type="button" value="选座" @click="toSelSeat(item.schedulingId)"></td>
+            <td v-if="item.movie.movieState === 1">此影院已被下架，敬请期待！</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            filmId:'',
+            schedulingList: []
+        },
+        methods: {
+            getScheduling() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: "http://localhost:8080/chwk/user/buytickets",
+                    data: "filmId=" +_this.filmId
+                }).then(function (resp) {
+                    console.log(resp.data.data)
+                    _this.schedulingList = resp.data.data;
+                });
+            },
+            formatDate(timestamp) {
+                const date = new Date(timestamp);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            },
+            toSelSeat(schedulingId){
+                localStorage.setItem("scheId",schedulingId);
+                window.location = "selSeat.html"
+            }
+        },
+        mounted() {
+            this.filmId = localStorage.getItem("filmId");
+            this.getScheduling();
+        }
+    })
+</script>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        table, td, tr {
+            text-align: center;
+        }
+
+        td {
+            width: 200px;
+            border: black solid;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: 30%;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td>用户</td>
+            <td>状态</td>
+            <td>操作</td>
+        </tr>
+        <tr v-for="item in userList">
+            <td>{{item.userName}}</td>
+            <td>
+                <span v-if="item.userState === 0">正常</span>
+                <span v-else-if="item.userState === 1">封禁</span>
+            </td>
+            <td>
+                <input v-if="item.userState === 0" type="button" value="封禁" @click="banUser(item.userId)">
+                <input v-if="item.userState === 1" type="button" value="解封" @click="UnblockingUser(item.userId)">
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            userList: []
+        },
+        methods: {
+            getAllUser() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/user/selectUser")
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.userList = resp.data.data;
+                    });
+            },
+            banUser(userId){
+                axios({
+                    method:'post',
+                    url:'http://localhost:8080/chwk/user/banuser',
+                    data:"userId=" + userId
+                })
+                .then(function (resp){
+                    console.log(resp.data)
+                    alert(resp.data.msg);
+                    window.location = "selUser.html"
+                })
+            },
+            UnblockingUser(userId){
+                axios({
+                    method:'post',
+                    url:'http://localhost:8080/chwk/user/unblockinguser',
+                    data:"userId=" + userId
+                })
+                    .then(function (resp){
+                        console.log(resp.data);
+                        alert(resp.data.msg);
+                        window.location = "selUser.html"
+                    })
+            }
+        },
+        mounted() {
+            this.getAllUser();
+        }
+    })
+</script>

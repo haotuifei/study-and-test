@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/qrcode.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <input type="button" value="立即购买" @click="pay">
+    <table>
+        <tr v-for="(row,i) in seatinfo">
+            <td v-for="(col,j) in row">
+                <span v-if="col===0" @click="selSeat(j,i)"><img
+                        src="http://localhost:8080/chwk/platform/down?filmId=0.png"></span>
+                <span v-if="col===1"><img src="http://localhost:8080/chwk/platform/down?filmId=1.png"></span>
+                <span v-if="col===2"><img src="http://localhost:8080/chwk/platform/down?filmId=2.png"></span>
+            </td>
+        </tr>
+    </table>
+
+    <div id="qrcode"></div>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            schedulingId: '',
+            scheduling: '',
+            seatinfo: [],
+            payNum:'',
+        },
+        methods: {
+            getSchedulingById() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: "http://localhost:8080/chwk/user/getschebyid",
+                    data: "schedulingId=" + _this.schedulingId
+                }).then(function (resp) {
+                    console.log(resp.data.data)
+                    _this.scheduling = resp.data.data;
+                });
+            },
+            getSeatInfoByScheId(schedulingId) {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: "http://localhost:8080/chwk/user/getseatinfobyscheid",
+                    data: "schedulingId=" + schedulingId
+                })
+                    .then(function (resp) {
+                        console.log(resp.data.data);
+                        _this.seatinfo = resp.data.data;
+                    });
+            },
+            selSeat(x, y) {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/user/selseat',
+                    data: "x=" + x + "&y=" + y + "&schedulingId=" + _this.schedulingId
+                }).then(function (resp) {
+                    console.log(resp.data);
+                    _this.payNum = resp.data.msg;
+                    localStorage.setItem('userpayNum', _this.payNum);
+                    window.location = "selSeat.html";
+                })
+            },
+            pay() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/user/buyticketwxcodeurl',
+                    data:"payNum=" + _this.payNum
+                }).then(function (resp) {
+                    console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        let code_url = resp.data.data.code_url;
+                        let qrcode = new QRCode(document.getElementById("qrcode"), {width: 200, height: 200});
+                        qrcode.makeCode(code_url);
+                        _this.getState();
+                    }
+                })
+            },
+            getState() {
+                let _this = this;
+                axios({
+                    method:'post',
+                    url:"http://localhost:8080/chwk/user/getstatebypaynum",
+                    data:"payNum=" + _this.payNum
+                }).then(function (resp) {
+                    console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        if (resp.data.data === 2) {
+                            alert("支付成功")
+                            window.location = "userHome.html";
+                        } else {
+                            setTimeout(() => {
+                                _this.getState();
+                            }, 1000);
+                        }
+                    }
+                })
+            },
+        }, mounted() {
+            this.schedulingId = localStorage.getItem("scheId");
+            this.getSchedulingById()
+            this.getSeatInfoByScheId(this.schedulingId);
+            this.payNum = localStorage.getItem('userpayNum');
+        }
+    })
+</script>

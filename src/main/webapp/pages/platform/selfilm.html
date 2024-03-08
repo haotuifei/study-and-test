@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        table, td, tr {
+            text-align: center;
+        }
+
+        td {
+            width: 200px;
+            border: black solid;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: 30%;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td>电影海报</td>
+            <td>电影名称</td>
+            <td>电影状态</td>
+            <td>操作</td>
+        </tr>
+        <tr v-for="item in filmList">
+            <td><img :src="item.filmPosters" height="172" width="108"></td>
+            <td>{{item.filmName}}</td>
+            <td>
+                <span v-if="item.filmState === 0">正常</span>
+                <span v-else-if="item.filmState === 1">封禁</span>
+            </td>
+            <td>
+                <input v-if="item.filmState === 0" type="button" value="封禁" @click="banFilm(item.filmId)">
+                <input v-if="item.filmState === 1" type="button" value="解封" @click="UnblockingFilm(item.filmId)">
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            filmList: []
+        },
+        methods: {
+            getAllFilm() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/platform/getallfilm")
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.filmList = resp.data.data;
+                    });
+            },
+            banFilm(filmId){
+                axios({
+                    method:'post',
+                    url:'http://localhost:8080/chwk/platform/banfilm',
+                    data:"filmId=" + filmId
+                })
+                    .then(function (resp){
+                        console.log(resp.data)
+                        alert(resp.data.msg);
+                        window.location = "selfilm.html"
+                    })
+            },
+            UnblockingFilm(filmId){
+                axios({
+                    method:'post',
+                    url:'http://localhost:8080/chwk/platform/UnblockingFilm',
+                    data:"filmId=" + filmId
+                })
+                    .then(function (resp){
+                        console.log(resp.data);
+                        alert(resp.data.msg);
+                        window.location = "selfilm.html"
+                    })
+            }
+        },
+        mounted() {
+            this.getAllFilm();
+        }
+    })
+</script>

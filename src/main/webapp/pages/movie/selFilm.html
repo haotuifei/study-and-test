@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        td {
+            width: 25%;
+            border: black 1px solid;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td>电影海报</td>
+            <td>电影名称</td>
+            <td>电影时长</td>
+        </tr>
+        <tr v-for="item in filmList">
+            <td><img :src="item.filmPosters" height="172" width="108"></td>
+            <td>{{item.filmName}}</td>
+            <td>{{item.filmTime/60}}分钟</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            filmList: ''
+        },
+        methods: {
+            getAllFilm() {
+                let _this = this;
+                axios.post('http://localhost:8080/chwk/movie/getallfilmbymovieid')
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.filmList = resp.data.data;
+                    });
+            }
+        },
+        mounted() {
+            this.getAllFilm();
+        }
+    })
+</script>

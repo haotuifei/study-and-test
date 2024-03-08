@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>登录</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  用户名：<input type="text" v-model="platformName"><br/>
+  密码：<input type="password" v-model="platformPassword"><br/>
+  <input type="button" value="登录" @click="login">
+  <a href="platformSign.html" style="font-size: 10px ">去注册-></a>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el: "#app",
+    data: {
+      platformName: '',
+      platformPassword: ''
+    },
+    methods: {
+      login() {
+        let _this = this;
+        axios({
+          method: 'post',
+          url: 'http://localhost:8080/chwk/platform/platformLogin',
+          data: "platformName=" + _this.platformName + "&platformPassword=" + _this.platformPassword
+        }).then(function (resp) {
+          console.log(resp.data);
+          if (resp.data.code === 200) {
+            alert(resp.data.msg);
+            window.location = "platformHome.html"
+          } else {
+            alert(resp.data.msg);
+          }
+        });
+      }
+    },
+  })
+</script>

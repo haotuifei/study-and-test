@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        table, td, tr {
+            text-align: center;
+        }
+
+        td {
+            width: 200px;
+            border: black solid;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: 30%;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <input type="button" value="查看历史订单订单" @click="getAllOrderByUserId">
+    <table>
+        <tr>
+            <td colspan="4">热映</td>
+        </tr>
+        <tr v-for="item in filmList">
+            <td><img :src="item.filmPosters" height="172" width="108"></td>
+            <td>{{item.filmName}}</td>
+            <td>{{item.filmTime/60}}分钟</td>
+            <td>
+                <input type="button" value="购票" @click="getScheduling(item.filmId)">
+            </td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            filmList: []
+        },
+        methods: {
+            getAllOrderByUserId(){
+              window.location="getOrder.html"
+            },
+            getlm() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/user/sss")
+                    .then(function (resp) {
+                        if (resp.data.code === 501){
+                            alert(resp.data.msg);
+                            window.location = "userLogin.html";
+                            return;
+                        }
+                        console.log(resp.data.data)
+                        _this.filmList = resp.data.data;
+                    });
+            },
+            getAllFilm() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/user/getallfilm")
+                    .then(function (resp) {
+                        if (resp.data.code === 501){
+                            alert(resp.data.msg);
+                            window.location = "userLogin.html";
+                            return;
+                        }
+                        console.log(resp.data.data)
+                        _this.filmList = resp.data.data;
+                    });
+            },
+            getScheduling(filmId) {
+                localStorage.setItem("filmId",filmId);
+                window.location = "buytickets.html";
+            },
+        },
+        mounted() {
+            this.getAllFilm();
+            this.getlm();
+        }
+    })
+</script>

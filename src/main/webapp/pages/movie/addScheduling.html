@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+    <style>
+        td {
+            border: black 1px solid;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+        选择电影:
+        <select v-model="schedulingFilmId">
+            <option v-for="item in filmList" :value="item.filmId">
+                {{item.filmName}}
+                &nbsp;时长：{{item.filmTime/60}}分钟
+            </option>
+        </select>
+        选择影厅：
+        <select v-model="schedulingCinemaHallId">
+            <option v-for="item in hallList" :value="item.cinemaHallId">
+                {{item.cinemaHallName}}
+            </option>
+        </select>
+        上映时间：<input type="datetime-local" v-model="schedulingRuntime">
+        票价：<input type="number" v-model="schedulingMoney">
+        <input type="button" value="提交" @click="saveSche">
+
+    <br/>
+    <table>
+        <tr>
+            <td>电影海报</td>
+            <td>电影名</td>
+            <td>影厅</td>
+            <td>上映时间</td>
+            <td>结束时间</td>
+            <td>票价</td>
+            <td>状态</td>
+            <td>操作</td>
+        </tr>
+        <tr v-for="item in schedulingList">
+            <td><img :src="item.film.filmPosters" height="172" width="108"></td>
+            <td>{{item.film.filmName}}</td>
+            <td>{{item.cinemaHall.cinemaHallName}}</td>
+            <td>{{formatDate(item.schedulingRuntime)}}</td>
+            <td>{{formatDate(item.schedulingOvertime)}}</td>
+            <td>{{item.schedulingMoney}}</td>
+            <td v-if="item.schedulingState === 0">正常</td>
+            <td v-if="item.schedulingState === 1">下架</td>
+            <td v-if="item.schedulingState === 0"><input type="button" value="下架" @click="bansche(item.schedulingId)">
+            </td>
+            <td v-if="item.schedulingState === 1"><input type="button" value="上架" @click="unbansche(item.schedulingId)">
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            schedulingList: [],
+            filmList: '',
+            filmTime: '',
+            hallList: '',
+            schedulingFilmId: '',
+            schedulingCinemaHallId: '',
+            schedulingRuntime: '',
+            schedulingMoney: '',
+        },
+        methods: {
+            saveSche() {
+                axios({
+                    method:'post',
+                    url:'http://localhost:8080/chwk/movie/savesche',
+                    data:"schedulingFilmId="+this.schedulingFilmId+"&schedulingCinemaHallId="+this.schedulingCinemaHallId+"&schedulingRuntime="+this.schedulingRuntime+"&schedulingMoney="+this.schedulingMoney
+                }).then(function (resp) {
+                    console.log(resp.data);
+                    alert(resp.data.msg);
+                });
+            },
+            unbansche(schedulingId) {
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/unbanschebyscheId',
+                    data: "schedulingId=" + schedulingId
+                }).then(function (resp) {
+                    console.log(resp.data)
+                    alert(resp.data.msg);
+                    window.location = "addScheduling.html";
+                });
+            },
+            bansche(schedulingId) {
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/banschebyscheId',
+                    data: "schedulingId=" + schedulingId
+                }).then(function (resp) {
+                    console.log(resp.data)
+                    alert(resp.data.msg);
+                    window.location = "addScheduling.html";
+                });
+            },
+            getScheByMovieId() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/movie/getschebymovieid")
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.schedulingList = resp.data.data;
+                    })
+            },
+            formatDate(timestamp) {
+                const date = new Date(timestamp);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            },
+            getAllFilm() {
+                let _this = this;
+                axios.post("http://localhost:8080/chwk/user/getallfilm")
+                    .then(function (resp) {
+                        console.log(resp.data.data)
+                        _this.filmList = resp.data.data;
+                    });
+            },
+            getCinHall() {
+                let _this = this
+                axios({
+                    method: 'post',
+                    url: "http://localhost:8080/chwk/movie/selectcinhall"
+                }).then(function (resp) {
+                    console.log(resp.data.data)
+                    _this.hallList = resp.data.data;
+                })
+            },
+            submitForm() {
+
+            }
+        },
+        mounted() {
+            this.getScheByMovieId();
+            this.getAllFilm();
+            this.getCinHall();
+        }
+    })
+</script>

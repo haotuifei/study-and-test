@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+</head>
+<body>
+<div id="app">
+    <input id="selcinhall" type="button" value="查看影厅">
+    <input id="selsche" type="button" value="查看拍片信息">
+    <input id="selorder" type="button" value="查看订单列表">
+    <input id="selfilm" type="button" value="查看可上映电影">
+    <input id="selallmoney" type="button" value="查看账号金额">
+</div>
+
+</body>
+</html>
+<script>
+    new Vue({
+        el:'#app',
+        methods:{
+          getlogin(){
+              axios.post("http://localhost:8080/chwk/movie/sss")
+              .then(function (resp){
+                  if (resp.data.code === 501){
+                      alert(resp.data.msg);
+                      window.location = "movieLogin.html";
+                  }
+              });
+          }
+        },
+        mounted(){
+            this.getlogin();
+        }
+    })
+    document.getElementById("selcinhall").addEventListener("click", function () {
+        window.location.href = "selCinHall.html";
+    });
+    document.getElementById("selsche").addEventListener("click", function () {
+        window.location.href = "addScheduling.html";
+    });
+    document.getElementById("selorder").addEventListener("click", function () {
+        window.location.href = "selOrder.html";
+    });
+    document.getElementById("selfilm").addEventListener("click", function () {
+        window.location.href = "selFilm.html";
+    });
+    document.getElementById("selallmoney").addEventListener("click", function () {
+        window.location.href = "selAllMoney.html";
+    });
+</script>

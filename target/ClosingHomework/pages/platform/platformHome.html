@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+</head>
+<body>
+<div id="app">
+    <input id="add" type="button" value="添加电影">
+    <input id="addmovie" type="button" value="添加影院"><br/>
+    <input id="selfilm" type="button" value="查看电影">
+    <input id="selmovie" type="button" value="查看影院">
+    <input id="seluser" type="button" value="查看用户">
+    <input id="selmoney" type="button" value="查看账户金额">
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        methods: {
+            getlogin() {
+                axios.post("http://localhost:8080/chwk/platform/getallfilm")
+                    .then(function (resp) {
+                        if (resp.data.code === 501) {
+                            alert(resp.data.msg);
+                            window.location = "platformLogin.html";
+                        }
+                    });
+            }
+        },
+        mounted() {
+            this.getlogin();
+        }
+    })
+    document.getElementById("add").addEventListener("click", function () {
+        window.location.href = "addfilm.html";
+    });
+
+    document.getElementById("selfilm").addEventListener("click", function () {
+        window.location.href = "selfilm.html";
+    });
+
+    document.getElementById("addmovie").addEventListener("click", function () {
+        window.location.href = "addMovie.html";
+    });
+
+    document.getElementById("selmovie").addEventListener("click", function () {
+        window.location.href = "selMovie.html";
+    });
+    document.getElementById("seluser").addEventListener("click", function () {
+        window.location.href = "selUser.html";
+    });
+    document.getElementById("selmoney").addEventListener("click", function () {
+        window.location.href = "selMoney.html";
+    });
+</script>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="../../js/vue.js"></script>
+  <script src="../../js/axios0.18.js"></script>
+    <style>
+        td{
+            border: black 1px solid;
+            text-align: center;
+        }
+        table{
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+<table>
+    <tr>
+        <td>
+            交易总金额为：{{allMoney}}
+        </td>
+        <td>
+            平台抽成：{{allMoney/2}}
+        </td>
+        <td>
+            实际盈利：{{allMoney/2}}
+        </td>
+    </tr>
+</table>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:'#app',
+    data:{
+        allMoney:''
+    },
+    methods:{
+      gerAllMoney(){
+          let _this = this;
+        axios.post("http://localhost:8080/chwk/movie/getallmoney")
+          .then(function (resp){
+              console.log(resp.data.data)
+            _this.allMoney = resp.data.data
+          })
+      }
+    },
+    mounted(){
+        this.gerAllMoney()
+    }
+  })
+</script>

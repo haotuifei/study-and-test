@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/axios0.18.js"></script>
+</head>
+<body>
+<div id="app">
+    <input type="button" value="添加行/换行" @click="addRow">
+    <input type="button" value="添加座位" @click="addCol">
+    <input type="button" value="添加过道" @click="addCol2">
+    <input type="button" value="撤销" @click="del">
+    <input type="button" value="保存" @click="saveSeatInfo">
+        <table>
+            <tr v-for="(row,i) in seatinfo">
+                <td v-for="(col,j) in row">
+                    <span v-if="col===0" @click="selSeat(j,i)"><img src="http://localhost:8080/chwk/platform/down?filmId=0.png"></span>
+                    <span v-if="col===1"><img src="http://localhost:8080/chwk/platform/down?filmId=1.png"></span>
+                    <span v-if="col===2"><img src="http://localhost:8080/chwk/platform/down?filmId=2.png"></span>
+                </td>
+            </tr>
+        </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            seatinfo:[],
+            cinemaHallId: '',
+            nowRow:-1
+        },
+        methods: {
+            saveSeatInfo(){
+              const formData = new FormData();
+              formData.append("cinemaHallId",this.cinemaHallId);
+              formData.append("cinemaHallSeat",JSON.stringify(this.seatinfo));
+              axios.post("http://localhost:8080/chwk/movie/saveSeatInfo",
+              formData).then(function (resp){
+                  console.log(resp.data)
+                  alert("添加成功");
+              })
+            },
+            addRow(){
+                if (this.seatinfo === null){
+                    this.nowRow = 0;
+                }else {
+                    this.nowRow++;
+                }
+                this.seatinfo.push([]);
+            },
+            addCol(seat){
+                this.seatinfo[this.nowRow].push(0);
+            },
+            addCol2(){
+                this.seatinfo[this.nowRow].push(1);
+            },
+            del(){
+                let len = this.seatinfo[this.nowRow].length;
+                if (len === 0){
+                    this.seatinfo.splice(this.seatinfo.length-1,1);
+                    this.nowRow--;
+                    len = this.seatinfo[this.nowRow].length;
+                }
+                    this.seatinfo[this.nowRow].splice(len-1,1);
+            },
+            selSeat(x,y){
+              alert(x + "," + y);
+            },
+            getSeatInfo() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/chwk/movie/getseatinfo',
+                    data:"cinemaHallId=" + _this.cinemaHallId
+                }).then(function (resp){
+                    console.log(resp.data.data)
+                    if (resp.data.data === null){
+                        let emptyArray = [];
+                        _this.seatinfo = emptyArray;
+                    }else {
+                        _this.seatinfo = resp.data.data;
+                    }
+
+
+                })
+            },
+            getCinHallId() {
+                this.cinemaHallId = localStorage.getItem("cinemaHallId");
+            }
+        },
+        mounted() {
+            this.getCinHallId();
+            this.getSeatInfo();
+        }
+    })
+</script>

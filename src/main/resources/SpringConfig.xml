@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <context:component-scan base-package="com.buka"/>
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    <tx:annotation-driven/>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <context:property-placeholder location="classpath*:jdbc.properties"/>
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="configLocation" value="classpath:mybatisConfig.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.buka.mapper"/>
+    </bean>
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/**"/>
+            <mvc:exclude-mapping path="/pages/user/**"/>
+            <mvc:exclude-mapping path="/user/userLogin"/>
+            <mvc:exclude-mapping path="/user/userSign"/>
+            <mvc:exclude-mapping path="/user/notify_url"/>
+            <mvc:exclude-mapping path="/platform//down"/>
+            <mvc:exclude-mapping path="/user/selectUser"/>
+            <mvc:exclude-mapping path="/user/banuser"/>
+            <mvc:exclude-mapping path="/user/unblockinguser"/>
+            <mvc:exclude-mapping path="/user/getallfilm"/>
+            <bean class="com.buka.interceptors.UserInterceptors"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/movie/**"/>
+            <mvc:exclude-mapping path="/pages/movie/**"/>
+            <mvc:exclude-mapping path="/movie/movieLogin"/>
+            <mvc:exclude-mapping path="/movie/movieSign"/>
+            <mvc:exclude-mapping path="/movie/banmovie"/>
+            <mvc:exclude-mapping path="/movie/selectfilm"/>
+            <mvc:exclude-mapping path="/movie/unblockingmovie"/>
+            <mvc:exclude-mapping path="/order/notify_url"/>
+            <bean class="com.buka.interceptors.MovieInterceptors"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/platform/**"/>
+            <mvc:exclude-mapping path="/pages/platform/**"/>
+            <mvc:exclude-mapping path="/platform/platformLogin"/>
+            <mvc:exclude-mapping path="/platform/platformSign"/>
+            <mvc:exclude-mapping path="/platform//down"/>
+            <mvc:exclude-mapping path="/movie/unblockingmovie"/>
+            <mvc:exclude-mapping path="/order/notify_url"/>
+            <mvc:exclude-mapping path="/movie/movieSign"/>
+            <bean class="com.buka.interceptors.PlatformInterceptors"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>
